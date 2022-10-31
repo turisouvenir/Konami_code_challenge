@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title># The Konami Code</title>
+    <style>
+        body {
+            font-family: Consolas, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        table {
+            border-spacing: 0;
+        }
+
+        th,
+        td {
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Sweet kittens</h1>
+    </header>
+    <main>
+        <span id="loader">Type Konami Code...</span>
+        <table border="1"></table>
+    </main>
+
+    <script>
+        let konamiCode = "";
+        let actualKonamiCode = "injects3crets";
+        let table = document.querySelector("table");
+        let loader = document.querySelector("#loader");
+
+
+        function duration(timestamps) {
+            let last = timestamps.pop();
+            let durations = [];
+            while (timestamps.length) {
+                durations.push(last - (last = timestamps.pop()));
+            }
+            return durations.reverse();
+        }
+
+        function display(mills) {
+            return Math.round(mills / 1000);
+        }
+
+        let durations = [];
+
+        document.addEventListener("keyup", function (e) {
+            durations.push(Date.now());
+        });
+        document.addEventListener("keydown", function (e) {
+            let current = durations;
+            current.push(Date.now());
+            durations = [];
+            let timeElapsed = current[current.length - 1] - current[0];
+
+            let secondsElapsed = duration(current).map(display)[0] || 0;
+
+            if (e.key === "Escape") {
+                konamiCode = "";
+                alert("Konami code reset!");
+            } else if (secondsElapsed > 5) {
+                konamiCode = "";
+                alert("Timed out, Konami code reset!");
+            } else {
+                konamiCode += e.key;
+                console.log("Key: ", konamiCode);
+            }
+            if (konamiCode === actualKonamiCode) {
+                table.style.display = "inline-block"
+                if (konamiCode.length)
+                    loader.style.display = "inline-block";
+                let data = fetch(
+                    "https://api.github.com/repos/elixir-lang/elixir/issues"
+                )
+                    .then((response) => response.json())
+                    .then((data) => {
+                        konamiCode = "";
+                        loader.style.display = "none";
+
+                        setTimeout(() => {
+                            konamiCode = "";
+                            table.innerHTML = "";
+                            table.style.display = "none";
+                            loader.style.display = "inline-block";
+                        }, 15000);
+
+
+                        data.slice(0, 5).forEach((issue) => {
+                            let author = issue.user.login;
+                            let issueName = issue.title;
+                            let tbody = document.createElement("tbody");
+                            let authorTd = document.createElement("td");
+                            let issueNameTd = document.createElement("td");
+                            authorTd.innerText = author;
+                            issueNameTd.innerText = issueName;
+                            tbody.appendChild(authorTd);
+                            tbody.appendChild(issueNameTd);
+                            table.appendChild(tbody);
+                        });
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>
