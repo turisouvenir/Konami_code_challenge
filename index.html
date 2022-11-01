@@ -78,7 +78,7 @@
                 konamiCode += e.key;
                 console.log("Key: ", konamiCode);
             }
-            if (konamiCode === actualKonamiCode) {
+            if (konamiCode.toUpperCase() == actualKonamiCode.toUpperCase()) {
                 table.style.display = "inline-block"
                 if (konamiCode.length)
                     loader.style.display = "inline-block";
